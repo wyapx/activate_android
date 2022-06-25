@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Activate Android</string>
+    <string name="title">You may be a victim of genuine Android</string>
+    <string name="btn_text">Switch to Piracy</string>
+    <string name="activate_title">Activate Android</string>
+    <string name="activate_description">Go to Settings to activate Android.</string>
+</resources>

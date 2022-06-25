@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">激活Android</string>
+    <string name="title">你可能是正版Android的受害者</string>
+    <string name="btn_text">回归盗版</string>
+    <string name="activate_title">激活 Android</string>
+    <string name="activate_description">转到“设置”以激活 Android。</string>
+</resources>
