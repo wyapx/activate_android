@@ -1,0 +1,2 @@
+# activate_android
+妈妈再也不用担心我的Android设备不能激活了
