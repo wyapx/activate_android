@@ -12,13 +12,12 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.WindowManager;
 
 public class PopupService extends IntentService {
 
     private WindowManager windowManager;
-    private View currentView;
+    private static View currentView;
     WindowManager.LayoutParams params;
 
     public PopupService() {
@@ -33,7 +32,7 @@ public class PopupService extends IntentService {
             windowManager.removeView(currentView);
             return;
         }
-        Log.i("aa", "Service started");
+        Log.i("activate", "Service started");
 
         windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
 
@@ -46,7 +45,8 @@ public class PopupService extends IntentService {
                 WindowManager.LayoutParams.WRAP_CONTENT,
                 WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
-                        | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
+                    | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
+                    | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
                 PixelFormat.TRANSLUCENT
         );
 
@@ -61,7 +61,6 @@ public class PopupService extends IntentService {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        // Log.i("aas", "destory");
     }
 
     @Nullable
@@ -72,6 +71,6 @@ public class PopupService extends IntentService {
 
     @Override
     protected void onHandleIntent(@Nullable Intent intent) {
-        Log.i("aas", "starting");
+        Log.i("activate", "starting");
     }
 }

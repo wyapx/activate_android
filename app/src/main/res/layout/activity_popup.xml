@@ -4,6 +4,8 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:background="@null"
+    android:duplicateParentState="true"
+    android:clickable="false"
     tools:context=".PopupService">
 
     <LinearLayout
