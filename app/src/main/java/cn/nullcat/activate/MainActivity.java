@@ -2,35 +2,53 @@ package cn.nullcat.activate;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.app.AppOpsManager;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.widget.Button;
 import android.widget.Toast;
 
-
 public class MainActivity extends AppCompatActivity {
-    private boolean is_active;
+    private boolean isActive;
+    private Button btn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Button btn = (Button) findViewById(R.id.button);
-        Intent intent = new Intent(this, PopupService.class);
+        btn = findViewById(R.id.button);
+        updateButtonLabel();
+
         btn.setOnClickListener(v -> {
-            AppOpsManager opsMgr = (AppOpsManager) getSystemService(APP_OPS_SERVICE);
-            if (opsMgr.checkOpNoThrow(
-                    "android:system_alert_window", android.os.Process.myUid(), getPackageName()
-            ) > 1) {
+            if (!Settings.canDrawOverlays(this)) {
                 Toast.makeText(this, "请在“设置”中启用“显示在其他应用上层”权限", Toast.LENGTH_SHORT).show();
-            } else {
-                if (!is_active) {
-                    startService(intent);
-                    Toast.makeText(this, "反向破解成功", Toast.LENGTH_SHORT).show();
-                    is_active = true;
-                } else Toast.makeText(this, "你现在已经是盗版了", Toast.LENGTH_SHORT).show();
+                Intent settingsIntent = new Intent(
+                        Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                        Uri.parse("package:" + getPackageName())
+                );
+                startActivity(settingsIntent);
+                return;
             }
+
+            Intent intent = new Intent(this, PopupService.class);
+            if (!isActive) {
+                startService(intent);
+                Toast.makeText(this, "反向破解成功", Toast.LENGTH_SHORT).show();
+                isActive = true;
+            } else {
+                stopService(intent);
+                Toast.makeText(this, "正版已恢复（暂时）", Toast.LENGTH_SHORT).show();
+                isActive = false;
+            }
+            updateButtonLabel();
         });
+    }
+
+    private void updateButtonLabel() {
+        if (btn == null) {
+            return;
+        }
+        btn.setText(isActive ? "恢复正版" : getString(R.string.btn_text));
     }
 }
