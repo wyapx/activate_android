@@ -1,12 +1,10 @@
 package cn.nullcat.activate;
 
 import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
 
-import android.app.IntentService;
+import android.app.Service;
 import android.content.Intent;
 import android.graphics.PixelFormat;
-import android.os.Build;
 import android.os.IBinder;
 import android.util.Log;
 import android.view.Gravity;
@@ -14,52 +12,69 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
 
-public class PopupService extends IntentService {
+/**
+ * Shows a non-interactive Windows-style activation watermark overlay.
+ * Lifecycle: add view on start, remove on destroy/stop — no static View leak.
+ */
+public class PopupService extends Service {
+
+    private static final String TAG = "activate";
 
     private WindowManager windowManager;
-    private static View currentView;
-    WindowManager.LayoutParams params;
+    private View overlayView;
 
-    public PopupService() {
-        super("PopupService");
-    }
-
-    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     public void onCreate() {
         super.onCreate();
-        if (currentView != null) {
-            windowManager.removeView(currentView);
+        windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        showOverlay();
+        return START_STICKY;
+    }
+
+    private void showOverlay() {
+        if (overlayView != null) {
             return;
         }
-        Log.i("activate", "Service started");
-
-        windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
+        Log.i(TAG, "Overlay service started");
 
         LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
+        overlayView = inflater.inflate(R.layout.activity_popup, null);
 
-        currentView = inflater.inflate(R.layout.activity_popup, null);
-
-        params = new WindowManager.LayoutParams(
+        WindowManager.LayoutParams params = new WindowManager.LayoutParams(
                 WindowManager.LayoutParams.WRAP_CONTENT,
                 WindowManager.LayoutParams.WRAP_CONTENT,
                 WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
-                    | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
-                    | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                        | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
+                        | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
                 PixelFormat.TRANSLUCENT
         );
-
         params.gravity = Gravity.BOTTOM | Gravity.END;
         params.x = 50;
         params.y = 50;
 
-        windowManager.addView(currentView, params);
-        // setContentView(R.layout.activity_popup);
+        windowManager.addView(overlayView, params);
+    }
+
+    private void removeOverlay() {
+        if (overlayView != null && windowManager != null) {
+            try {
+                windowManager.removeView(overlayView);
+            } catch (IllegalArgumentException e) {
+                Log.w(TAG, "Overlay already removed", e);
+            }
+            overlayView = null;
+        }
     }
 
     @Override
     public void onDestroy() {
+        removeOverlay();
+        Log.i(TAG, "Overlay service destroyed");
         super.onDestroy();
     }
 
@@ -67,10 +82,5 @@ public class PopupService extends IntentService {
     @Override
     public IBinder onBind(Intent intent) {
         return null;
-    }
-
-    @Override
-    protected void onHandleIntent(@Nullable Intent intent) {
-        Log.i("activate", "starting");
     }
 }
